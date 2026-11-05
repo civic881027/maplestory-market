@@ -1,0 +1,2344 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>神秘谷 自由市場即時行情看板</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #12141a;
+      --card-bg: #181a20;
+      --panel-bg: #1e2129;
+      --row-alt: #232731;
+      --hover-bg: #2a303d;
+      --border-color: #2b2f3a;
+      --border-focus: #448aff;
+      --text-main: #e6e8ea;
+      --text-muted: #9aa0a6;
+      --c-accent: #90caf9;
+      --c-green: #69f0ae;
+      --c-yellow: #ffd54f;
+      --c-pink: #ff80ab;
+      --c-red: #ff5252;
+      --c-blue: #80d8ff;
+      --c-orange: #ff9e80;
+      --c-purple: #ea80fc;
+      --c-tag-bg: #22252e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: linear-gradient(180deg, #1f2430 0%, #181a20 100%);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .header-content {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-icon {
+      background: #1565c0;
+      color: #fff;
+      font-size: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(21, 101, 192, 0.5);
+    }
+
+    .title-box h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+    }
+
+    .title-box p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .stats-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .stat-badge {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .stat-badge .stat-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--c-accent);
+      font-size: 14px;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1600px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Controls Bar */
+    .controls-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 280px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background-color: #22252e;
+      border: 1px solid #3a3f4d;
+      border-radius: 6px;
+      padding: 9px 14px 9px 36px;
+      color: #ffffff;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(68, 138, 255, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+      font-size: 14px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      background-color: #2b313f;
+      border: 1px solid #3d4659;
+      color: #ffffff;
+      border-radius: 5px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .btn:hover {
+      background-color: #3a4254;
+      border-color: #556077;
+    }
+
+    .btn-primary {
+      background-color: #1976d2;
+      border-color: #2196f3;
+    }
+    .btn-primary:hover {
+      background-color: #1565c0;
+    }
+
+    /* Tabs Bar */
+    .tabs-nav {
+      display: flex;
+      gap: 4px;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 0px;
+      margin-top: 4px;
+    }
+
+    .tab-btn {
+      background: #181a20;
+      border: 1px solid var(--border-color);
+      border-bottom: none;
+      color: var(--text-muted);
+      padding: 10px 20px;
+      border-radius: 8px 8px 0 0;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+      background: #232731;
+    }
+
+    .tab-btn.active {
+      color: var(--c-accent);
+      background: var(--panel-bg);
+      border-color: var(--border-focus) var(--border-focus) transparent var(--border-focus);
+      border-top: 2px solid var(--border-focus);
+    }
+
+    .tab-badge-count {
+      background: #262a34;
+      border-radius: 12px;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: #cfd8dc;
+    }
+
+    .tab-btn.active .tab-badge-count {
+      background: rgba(68, 138, 255, 0.25);
+      color: #90caf9;
+    }
+
+    
+    #hot-note {
+      display: none;
+      padding: 10px 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-bottom: none;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+    .hot-rank { color: var(--c-yellow); font-family: monospace; font-weight: 700; margin-right: 6px; }
+    .hot-up { color: var(--c-orange); }
+    .hot-down { color: var(--c-green); }
+    .hot-dim { color: #546e7a; }
+    .hot-spark { display: block; }
+
+    
+    #atk-settings, #scroll-settings {
+      display: none;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 16px;
+      padding: 10px 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-bottom: none;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    #atk-settings .atk-mode { display: flex; gap: 4px; }
+    #atk-settings .atk-mode .btn.active { border-color: var(--border-focus); color: var(--c-accent); }
+    #atk-settings .atk-note, #scroll-settings .atk-note { flex-basis: 100%; line-height: 1.6; }
+    .atk-deal { color: var(--c-green); font-weight: 700; }
+    .atk-pricey { color: var(--c-orange); }
+    .atk-dim { color: #546e7a; }
+    .atk-neg { color: var(--c-orange); }
+    .atk-pos { color: var(--c-green); }
+    #atk-settings label, #scroll-settings label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    tr.atk-hist td { opacity: 0.6; }
+    tr.scroll-extrap td { opacity: 0.55; }
+
+
+    /* Table Container */
+    .table-container {
+      background-color: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0 0 8px 8px;
+      overflow-x: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12.5px;
+      white-space: nowrap;
+    }
+
+    thead {
+      background-color: #262a34;
+      color: var(--c-accent);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    th {
+      padding: 10px 10px;
+      font-weight: 700;
+      border: 1px solid #2c313c;
+      user-select: none;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.15s;
+    }
+
+    th:hover {
+      background-color: #2e3442;
+      color: #fff;
+    }
+
+    th.sorted-asc::after {
+      content: " ▲";
+      font-size: 10px;
+      color: var(--c-green);
+    }
+    th.sorted-desc::after {
+      content: " ▼";
+      font-size: 10px;
+      color: var(--c-pink);
+    }
+
+    td {
+      padding: 6px 10px;
+      border: 1px solid #262a34;
+      vertical-align: middle;
+    }
+
+    /* Parent Row */
+    tr.group-parent {
+      background-color: #1e2129;
+      cursor: pointer;
+      transition: background-color 0.15s;
+      font-weight: 600;
+    }
+
+    tr.group-parent:hover {
+      background-color: var(--hover-bg);
+    }
+
+    tr.group-parent.expanded {
+      background-color: #242a36;
+      border-left: 3px solid var(--c-accent);
+    }
+
+    .tree-toggle {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      line-height: 16px;
+      text-align: center;
+      margin-right: 6px;
+      color: var(--c-accent);
+      font-size: 11px;
+      transition: transform 0.2s ease;
+      font-weight: bold;
+    }
+
+    tr.group-parent.expanded .tree-toggle {
+      transform: rotate(90deg);
+      color: var(--c-yellow);
+    }
+
+    /* Child Row */
+    tr.group-child {
+      background-color: #1a1c23;
+      display: none;
+      font-size: 12px;
+      color: #cfd8dc;
+    }
+
+    tr.group-child.show {
+      display: table-row;
+    }
+
+    tr.group-child:hover {
+      background-color: #262b37;
+    }
+
+    tr.group-child td:first-child {
+      padding-left: 32px;
+    }
+
+    /* Column Specific Formatting */
+    .col-name {
+      color: var(--c-accent);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+    .col-name-item {
+      color: #a5d6a7;
+    }
+    .col-name-sold {
+      color: var(--c-yellow);
+    }
+
+    .col-price {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      text-align: right;
+    }
+    .price-min { color: var(--c-green); }
+    .price-child { color: var(--c-yellow); }
+    .price-avg { color: #b0bec5; font-size: 11.5px; }
+
+    .col-status {
+      text-align: center;
+      font-weight: 600;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+    .status-sale { background: rgba(105, 240, 174, 0.15); color: var(--c-green); }
+    .status-sold { background: rgba(255, 128, 171, 0.18); color: var(--c-pink); }
+    .status-partial { background: rgba(255, 213, 79, 0.18); color: var(--c-yellow); }
+
+    .stat-val {
+      font-family: 'JetBrains Mono', monospace;
+      text-align: center;
+      font-weight: 600;
+    }
+    .stat-str { color: #ff8a80; }
+    .stat-dex { color: #b9f6ca; }
+    .stat-int { color: #80d8ff; }
+    .stat-luk { color: #ffff8d; }
+    .stat-atk { color: #ff9e80; }
+    .stat-matk { color: #ea80fc; }
+    .stat-slot { color: #ffffff; }
+    .q-tag { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: 3px; font-size: 11px; font-weight: 700; line-height: 16px; color: #1a1a1a; background: #ffd54f; vertical-align: 1px; cursor: help; }
+    .q-dim { margin-left: 6px; font-size: 11px; color: #78909c; cursor: help; }
+    .q-warn { margin-left: 6px; font-size: 11px; color: #ffab91; cursor: help; }
+
+    .col-loc {
+      color: #81c784;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .col-seller {
+      color: #b0bec5;
+    }
+
+    .col-tooltip {
+      max-width: 380px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #b0bec5;
+      font-size: 11.5px;
+    }
+
+    .tt-tag {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 10.5px;
+      margin-right: 4px;
+      background: #2b313f;
+      color: #90caf9;
+      cursor: pointer;
+    }
+    .tt-tag:hover {
+      background: #1976d2;
+      color: #fff;
+    }
+
+    /* Modal for Image or Tooltip Detail */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-card {
+      background: #1e2129;
+      border: 1px solid #3a3f4d;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 100%;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header {
+      padding: 12px 18px;
+      background: #262a34;
+      border-bottom: 1px solid #323744;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #90caf9;
+      font-weight: bold;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: #9aa0a6;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .modal-close:hover {
+      color: #fff;
+    }
+    .modal-body {
+      padding: 16px;
+      overflow-y: auto;
+      max-height: 80vh;
+      text-align: center;
+    }
+    .modal-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      border: 1px solid #3a3f4d;
+      margin-bottom: 12px;
+    }
+    .modal-body pre {
+      text-align: left;
+      background: #12141a;
+      padding: 12px;
+      border-radius: 6px;
+      color: #ce93d8;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    footer {
+      margin-top: auto;
+      border-top: 1px solid var(--border-color);
+      padding: 14px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 11.5px;
+      background: #15171d;
+    }
+
+    /* MapleStory Floating Image Tooltip (Matching Desktop GUI) */
+    #maple-tooltip-float {
+      position: fixed;
+      pointer-events: none;
+      z-index: 99999;
+      background-color: #10141d;
+      border: 2px solid #5c6bc0;
+      border-radius: 6px;
+      padding: 5px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9), 0 0 15px rgba(92, 107, 192, 0.4);
+      display: none;
+      transition: opacity 0.1s ease;
+    }
+    #maple-tooltip-float img {
+      display: block;
+      max-width: 320px;
+      height: auto;
+      border-radius: 4px;
+    }
+    #maple-tooltip-float .tt-caption {
+      font-size: 11px;
+      color: #90caf9;
+      text-align: center;
+      margin-top: 4px;
+      font-weight: bold;
+    }
+
+    .cam-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(68, 138, 255, 0.2);
+      border: 1px solid #448aff;
+      color: #82b1ff;
+      border-radius: 4px;
+      padding: 1px 4px;
+      font-size: 11px;
+      margin-right: 6px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s;
+    }
+    .cam-badge:hover {
+      background: #1976d2;
+      color: #ffffff;
+      transform: scale(1.1);
+    }
+
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .controls-card {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .tab-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-content">
+    <div class="logo-area">
+      <div class="badge-icon">🍁</div>
+      <div class="title-box">
+        <h1>神秘谷 自由市場行情公開看板</h1>
+        <p>即時由拍賣辨識機器人巡邏收錄 ｜ 全自動物價分析與成交追蹤</p>
+      </div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-badge">
+        <span>總商品數</span>
+        <span class="stat-num" id="stat-total-records">0</span>
+      </div>
+      <div class="stat-badge">
+        <span>裝備總數</span>
+        <span class="stat-num" id="stat-equip-records" style="color: #90caf9;">0</span>
+      </div>
+      <div class="stat-badge">
+        <span>一般道具</span>
+        <span class="stat-num" id="stat-item-records" style="color: #a5d6a7;">0</span>
+      </div>
+      <div class="stat-badge">
+        <span>熱門已售出</span>
+        <span class="stat-num" id="stat-sold-records" style="color: #ffd54f;">0</span>
+      </div>
+      <div class="stat-badge">
+        <span>更新時間</span>
+        <span class="stat-num" id="stat-update-time" style="color: #b0bec5; font-size: 12px;">-</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="controls-card">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" class="search-input" placeholder="過濾商品名稱、賣家或屬性數值（即時搜尋）...">
+    </div>
+    <div class="action-buttons">
+      <button class="btn" id="expandAllBtn">🔽 全部展開</button>
+      <button class="btn" id="collapseAllBtn">🔼 全部收合</button>
+      <button class="btn btn-primary" id="refreshBtn">🔄 重整資料</button>
+    </div>
+  </div>
+
+  <div class="tabs-nav">
+    <button class="tab-btn active" data-tab="equip">
+      🛡️ 裝備專區 (Eqp.img)
+      <span class="tab-badge-count" id="equipTabBadge">0</span>
+    </button>
+    <button class="tab-btn" data-tab="item">
+      🎒 一般道具專區 (Consume/Etc/Ins)
+      <span class="tab-badge-count" id="itemTabBadge">0</span>
+    </button>
+    <button class="tab-btn" data-tab="sold">
+      💰 已售出/熱門成交專區 (有人買)
+      <span class="tab-badge-count" id="soldTabBadge">0</span>
+    </button>
+    <button class="tab-btn" data-tab="hot">
+      🦉 熱門行情
+      <span class="tab-badge-count" id="hotTabBadge">0</span>
+    </button>
+    <button class="tab-btn" data-tab="atk">
+      📈 攻擊價差
+      <span class="tab-badge-count" id="atkTabBadge">0</span>
+    </button>
+    <button class="tab-btn" data-tab="scroll">
+      📜 衝卷試算
+      <span class="tab-badge-count" id="scrollTabBadge">0</span>
+    </button>
+  </div>
+
+
+  <div id="hot-note">
+    遊戲內查詢榜（貓頭鷹）前十名，<span id="hot-source-date"></span>每小時記一次在架開價，展開可看每日變化。
+    漲跌以「最低價」比較：24 小時、7 天前最接近的一筆紀錄；漲標橘、跌標綠。走勢圖為近 7 天最低價（實線）與中位價（虛線）。
+    開價不等於成交價；每週六清空後剛開始重掃時，最低價可能因為只掃到部分房間而偏高。
+  </div>
+
+  <div id="atk-settings">
+    <div class="atk-mode">
+      <button class="btn active" data-atk-mode="item">依單件裝備</button>
+      <button class="btn" data-atk-mode="type">依裝備類型</button>
+    </div>
+    <label><input type="checkbox" id="atkHistToggle" checked> 含近 <span id="atkHistDays">28</span> 天已下架的掛單（<span id="atkHistCount">0</span> 筆）</label>
+    <span class="atk-note">
+      開價對「超出底值的攻擊」「成功卷數」「失敗卷數」同時做對數回歸：
+      「每 +1 攻擊」是成功數、失敗數相同時攻擊多 1 點，開價平均變成幾倍（乾淨裝備的攻擊差就是底值好壞，所以這也是屬性等級溢價；「頂比平」把它換算成頂級底值比平均底值貴幾倍）；
+      「每 1 成功卷」是攻擊相同時多用掉一次成功的卷；「每 1 失敗卷」是攻擊相同時多燒掉一次，也就是失敗折價。
+      同一件裝備含上過卷的（名稱帶 +N）一起算，至少 4 筆；依類型時，同類型各裝備先各自扣掉平均再合併計算。
+      短杖、長杖與只有魔攻的法師裝備，「攻擊」改看魔攻 + 智力（1 智力 = 1 魔攻）。
+      變數不變動或和其他變數同步變化時會捨棄該變數（顯示 -）。
+      「價÷預期」低於 0.5 標綠，代表比同條件的行情便宜一半以上。開價不等於成交價，筆數少時僅供參考。
+      開價 19 億以上是頂到楓幣上限（21.47 億）的佔位價，實際以祝福卷軸（WS）計價：標「WS 計價」、只當下限、不進回歸；超過 5 億的估價旁會換算成 WS（匯率 = 祝福卷軸目前最低開價）。
+      已下架的掛單只用來算行情（列表中顯示為半透明），「最划算一筆」只從還在架上的挑。
+    </span>
+  </div>
+  <div id="scroll-settings">
+    <label><input type="checkbox" id="scrollBlessToggle"> 搭配祝福卷軸（失敗不扣次數，市價 <span id="scrollBlessPrice">-</span>）</label>
+    <span class="atk-note">
+      用攻擊價差算出的係數當估價器，對每件裝備列出適用的攻擊 / 魔攻卷軸（成功率、加成、破壞率來自 Item.wz，卷軸價是目前市場最低開價）。
+      起點是「頂攻乾淨品」：攻擊等於 WZ 上限、沒衝過的那件（衝卷值得用頂攻的來衝），預期價由回歸估出。
+      「衝一卷淨期望」：成功加攻擊、失敗燒一次（詛咒卷另有破壞率），期望價減現值再減卷軸價。
+      「衝滿」：把全部次數衝完的期望成品價、期望用掉的卷數與存活率；總成本 = 乾淨品預期價 + 期望卷錢；淨期望 = 期望成品價 − 總成本。
+      混沌卷成功時攻擊在設定範圍內均勻變動（assets/scroll_overrides.json，目前是使用者記憶的數字），攻擊歸零後不再變動。
+      攻擊超出市場看過的範圍時不外推，估價停在範圍邊緣；衝滿後超過四分之一的成品落在範圍外的列會變淡，數字只能當方向看。
+      「市場成品最低價」是同件裝備在架上、衝過至少一次的最低開價（頂到楓幣上限的 WS 計價掛單不算），拿來和自己衝的總成本比。
+      超過 5 億的金額旁會換算成 WS，匯率 = 祝福卷軸目前最低開價 <span id="scrollWsRate">-</span>；真正值錢的成品在這伺服器是用 WS 私下交易，精靈商人看不到，所以高攻端的估價偏低。
+    </span>
+  </div>
+  <div class="table-container">
+    <!-- Equipments Table -->
+    <table id="table-equip" class="data-table">
+      <thead>
+        <tr>
+          <th data-sort="item_name" style="width: 220px;">裝備名稱 ⇅</th>
+          <th data-sort="min_price" style="text-align: right; width: 130px;">最低/售價 ⇅</th>
+          <th data-sort="min_location" style="width: 80px;">位置 ⇅</th>
+          <th data-sort="min_seller" style="width: 120px;">賣家 ⇅</th>
+          <th data-sort="max_str" style="text-align: center; width: 60px;">力 ⇅</th>
+          <th data-sort="max_dex" style="text-align: center; width: 60px;">敏 ⇅</th>
+          <th data-sort="max_int" style="text-align: center; width: 60px;">智 ⇅</th>
+          <th data-sort="max_luk" style="text-align: center; width: 60px;">幸 ⇅</th>
+          <th data-sort="max_atk" style="text-align: center; width: 65px;">物攻 ⇅</th>
+          <th data-sort="max_matk" style="text-align: center; width: 65px;">魔攻 ⇅</th>
+          <th data-sort="max_slots" style="text-align: center; width: 65px;" title="剩餘可使用卷軸次數 / 裝備原本總次數">剩餘卷 ⇅</th>
+          <th data-sort="median_price" style="text-align: right; width: 110px;">中位價 ⇅</th>
+          <th data-sort="avg_price" style="text-align: right; width: 110px;">均價 ⇅</th>
+          <th style="min-width: 200px;">收錄文字 / 時間</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-equip"></tbody>
+    </table>
+
+    <!-- General Items Table -->
+    <table id="table-item" class="data-table" style="display: none;">
+      <thead>
+        <tr>
+          <th data-sort="item_name" style="width: 240px;">道具名稱 ⇅</th>
+          <th data-sort="min_price" style="text-align: right; width: 130px;">最低/單價 ⇅</th>
+          <th data-sort="total_qty" style="text-align: center; width: 130px;">狀態/總數量 ⇅</th>
+          <th data-sort="min_location" style="width: 90px;">最低位置 ⇅</th>
+          <th data-sort="min_seller" style="width: 140px;">賣家 ⇅</th>
+          <th data-sort="median_price" style="text-align: right; width: 120px;">中位價 ⇅</th>
+          <th data-sort="avg_price" style="text-align: right; width: 120px;">均價 ⇅</th>
+          <th data-sort="max_price" style="text-align: right; width: 120px;">最高價 ⇅</th>
+          <th data-sort="count" style="min-width: 180px;">攤位數 / 時間 ⇅</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-item"></tbody>
+    </table>
+
+    <!-- Sold Items Table -->
+    <table id="table-sold" class="data-table" style="display: none;">
+      <thead>
+        <tr>
+          <th data-sort="item_name" style="width: 240px;">已售出商品名稱 ⇅</th>
+          <th data-sort="total_sold_qty" style="text-align: center; width: 130px;">累積成交數 ⇅</th>
+          <th data-sort="min_price" style="text-align: right; width: 130px;">成交最低/單價 ⇅</th>
+          <th data-sort="total_rem_qty" style="text-align: center; width: 120px;">狀態 / 剩餘數 ⇅</th>
+          <th data-sort="min_location" style="width: 90px;">位置 ⇅</th>
+          <th data-sort="min_seller" style="width: 120px;">賣家 ⇅</th>
+          <th data-sort="median_price" style="text-align: right; width: 120px;">成交中位價 ⇅</th>
+          <th data-sort="avg_price" style="text-align: right; width: 120px;">成交均價 ⇅</th>
+          <th data-sort="max_price" style="text-align: right; width: 120px;">成交最高價 ⇅</th>
+          <th style="min-width: 220px;">裝備屬性 / 成交紀錄時間</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-sold"></tbody>
+    </table>
+
+    <table id="table-hot" class="data-table" style="display: none;">
+      <thead>
+        <tr>
+          <th data-sort="rank" style="width: 240px;">排名 / 道具 ⇅</th>
+          <th data-sort="min_price" style="text-align: right; width: 130px;">目前最低 ⇅</th>
+          <th data-sort="median_price" style="text-align: right; width: 120px;">中位價 ⇅</th>
+          <th data-sort="listings" style="text-align: center; width: 110px;">在架筆數 / 數量 ⇅</th>
+          <th data-sort="chg24" style="text-align: right; width: 100px;" title="目前最低價對比約 24 小時前的最低價">24 小時 ⇅</th>
+          <th data-sort="chg7d" style="text-align: right; width: 100px;" title="目前最低價對比約 7 天前的最低價">7 天 ⇅</th>
+          <th data-sort="low30" style="text-align: right; width: 200px;" title="近 30 天紀錄中，最低價的最低與最高">30 天最低價區間 ⇅</th>
+          <th style="width: 140px;">7 天走勢</th>
+          <th data-sort="last_bucket" style="min-width: 140px;">最後紀錄 ⇅</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-hot"></tbody>
+    </table>
+
+    <table id="table-atk" class="data-table" style="display: none;">
+      <thead>
+        <tr>
+          <th data-sort="name" style="width: 200px;">名稱 ⇅</th>
+          <th data-sort="type" style="width: 80px;">類型 ⇅</th>
+          <th data-sort="req_level" style="text-align: center; width: 60px;">等級 ⇅</th>
+          <th data-sort="n" style="text-align: center; width: 70px;">有效筆數 ⇅</th>
+          <th data-sort="atk_max" style="text-align: center; width: 110px;" title="法師裝備為魔攻 + 智力；括號為乾淨底值">攻擊 / 魔攻 ⇅</th>
+          <th data-sort="slot_max" style="text-align: center; width: 80px;" title="剩餘可使用卷軸次數 / 裝備原本總次數">剩餘卷 ⇅</th>
+          <th data-sort="mult" style="text-align: right; width: 95px;" title="成功數、失敗數相同時，攻擊每多 1 點，開價平均變成幾倍">每 +1 攻擊 ⇅</th>
+          <th data-sort="up_mult" style="text-align: right; width: 95px;" title="攻擊相同時，每多用掉一次成功的卷，開價平均變成幾倍">每 1 成功卷 ⇅</th>
+          <th data-sort="fail_mult" style="text-align: right; width: 95px;" title="攻擊相同時，每多燒掉一次，開價平均變成幾倍">每 1 失敗卷 ⇅</th>
+          <th data-sort="top_mult" style="text-align: right; width: 90px;" title="頂級底值（WZ 上限）比平均底值貴幾倍">頂比平 ⇅</th>
+          <th data-sort="per_atk" style="text-align: right; width: 150px;" title="以中位價換算：攻擊每多 1 點約貴多少楓幣；展開後為該筆依三個變數推算的預期價">≈ 每 1 攻擊楓幣 / 預期價 ⇅</th>
+          <th data-sort="r2" style="text-align: center; width: 60px;" title="三個變數能解釋多少 log(價格) 的差異，0~1，越接近 1 越可信">R² ⇅</th>
+          <th data-sort="median_price" style="text-align: right; width: 120px;">中位價 / 開價 ⇅</th>
+          <th data-sort="best_ratio" style="min-width: 220px;" title="開價 ÷ 同條件預期價，最低的一筆">最划算一筆 / 價÷預期 ⇅</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-atk"></tbody>
+    </table>
+    <table id="table-scroll" class="data-table" style="display: none;">
+      <thead>
+        <tr>
+          <th data-sort="name" style="width: 200px;">裝備 / 卷軸 ⇅</th>
+          <th data-sort="type" style="width: 70px;">類型 ⇅</th>
+          <th data-sort="v0" style="text-align: right; width: 120px;" title="頂攻（WZ 上限）、沒衝過的那件的估價">頂攻乾淨品預期價 ⇅</th>
+          <th data-sort="scroll_price" style="text-align: right; width: 100px;" title="市場最低開價">卷軸市價 ⇅</th>
+          <th data-sort="success" style="text-align: center; width: 90px;" title="成功率 / 成功時攻擊加成 / 失敗破壞率">成功率 ⇅</th>
+          <th data-sort="one_net" style="text-align: right; width: 110px;" title="衝一卷：期望價 − 現值 − 卷軸價">衝一卷淨期望 ⇅</th>
+          <th data-sort="full_val" style="text-align: right; width: 110px;" title="全部次數衝完的期望成品價（含被破壞算 0）">衝滿期望成品價 ⇅</th>
+          <th data-sort="full_scrolls" style="text-align: center; width: 70px;" title="衝滿期望用掉的卷數">期望卷數 ⇅</th>
+          <th data-sort="full_cost" style="text-align: right; width: 110px;" title="乾淨品預期價 + 期望卷錢（含祝福卷）">期望總成本 ⇅</th>
+          <th data-sort="full_net" style="text-align: right; width: 110px;" title="衝滿期望成品價 − 期望總成本">衝滿淨期望 ⇅</th>
+          <th data-sort="alive" style="text-align: center; width: 60px;" title="衝滿過程沒被破壞的機率">存活率 ⇅</th>
+          <th data-sort="market_price" style="min-width: 200px;" title="同件裝備在架上、衝過至少一次的最低開價">市場成品最低價 ⇅</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-scroll"></tbody>
+    </table>
+  </div>
+</main>
+
+<!-- Tooltip Detail Modal -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span id="modalTitle">商品詳細收錄資訊</span>
+      <button class="modal-close" id="modalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <img id="modalImg" src="" alt="Tooltip Image" style="display: none;">
+      <pre id="modalText"></pre>
+    </div>
+  </div>
+</div>
+
+<!-- Floating MapleStory Game Tooltip Window (Desktop Hover Matching) -->
+<div id="maple-tooltip-float">
+  <img id="maple-tooltip-img" src="" alt="Tooltip">
+  <div class="tt-caption" id="maple-tooltip-caption"></div>
+</div>
+
+<footer>
+  MapleStory Market OCR Auto-Monitor &copy; 2026 ｜ 每週六 00:00 自動歸檔循環 ｜ 支援手機與電腦全平台瀏覽
+</footer>
+
+<script>
+// Filled from market_data.json at boot; the empty shape keeps early renders safe
+let MARKET_DATA = { exported_at: '', equip: [], item: [], sold: [], hot: { items: [] } };
+
+let activeTab = 'equip';
+let searchQuery = '';
+let sortStates = {
+  equip: { col: 'item_name', asc: true },
+  item: { col: 'item_name', asc: true },
+  sold: { col: 'total_sold_qty', asc: false }
+};
+
+// Formatting helpers
+function escapeHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, ch => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[ch]));
+}
+
+// Rows reference detail records by index, so no record text ever lands inside an inline handler
+let detailItems = [];
+function registerDetail(item) {
+  detailItems.push(item);
+  return detailItems.length - 1;
+}
+
+// 'YYYY-MM-DD hh:mm:ss' -> 'MM/DD hh:mm'
+function formatTime(t) {
+  const m = /^\d{4}-(\d{2})-(\d{2})[ T](\d{2}:\d{2})/.exec(t || '');
+  return m ? `${m[1]}/${m[2]} ${m[3]}` : (t || '-');
+}
+
+function formatNum(n) {
+  if (n === null || n === undefined || isNaN(n)) return '-';
+  return Number(n).toLocaleString('en-US');
+}
+
+function renderStatCell(val, colClass, st) {
+  // st: this stat's entry from base_eval ({base, min, max}) -> hover shows the clean base range
+  const tip = st && st.base > 0 ? ` title="基準 ${st.base}（${st.min} ~ ${st.max}）"` : '';
+  if (val === null || val === undefined || val === 0) {
+    return `<td class="stat-val" style="color: #4a5060;"${tip}>-</td>`;
+  }
+  const prefix = val > 0 ? `+${val}` : `${val}`;
+  return `<td class="stat-val ${colClass}"${tip}>${prefix}</td>`;
+}
+
+// Remaining scroll slots as 'left / total': 0 is a real value (fully used), and no '+' since it is not a bonus
+function renderSlotCell(val, ev) {
+  if (val === null || val === undefined) {
+    return `<td class="stat-val" style="color: #4a5060;">-</td>`;
+  }
+  const total = ev && ev.tuc ? `/${ev.tuc}` : '';
+  const tip = ev && ev.tuc ? ` title="剩餘可使用卷軸 ${val} 次，裝備原本共 ${ev.tuc} 次"` : '';
+  return `<td class="stat-val stat-slot"${tip}>${val}${total}</td>`;
+}
+
+const STAT_LABEL = { atk_stat: '攻擊', matk_stat: '魔攻', str_stat: '力量', dex_stat: '敏捷', int_stat: '智力', luk_stat: '幸運' };
+
+function statOf(c, col) {
+  return c.base_eval && c.base_eval.stats ? c.base_eval.stats[col] : null;
+}
+
+function baseSummary(ev) {
+  const parts = Object.entries(ev.stats || {})
+    .filter(([k, s]) => s.base > 0 && STAT_LABEL[k])
+    .map(([k, s]) => `${STAT_LABEL[k]} ${s.base} (${s.min}~${s.max})`);
+  parts.push(`卷軸 ${ev.scroll_slots ?? '?'} / ${ev.tuc}`);
+  return '基準值：' + parts.join('、');
+}
+
+// Gold '頂攻' pills only on clean (never scrolled) items; scrolled ones just get a dim note
+function renderQuality(ev) {
+  if (!ev) return '';
+  const tip = escapeHtml(baseSummary(ev));
+  if (ev.clean) {
+    const tags = (ev.top_tags || []).map(t => `<span class="q-tag" title="${tip}">${escapeHtml(t)}</span>`).join('');
+    return tags || `<span class="q-dim" title="${tip}">乾淨</span>`;
+  }
+  if (ev.upgrade > 0) {
+    return `<span class="q-dim" title="${tip}">已衝 ${ev.upgrade} 卷${ev.failed ? `・失敗 ${ev.failed}` : ''}</span>`;
+  }
+  if (ev.failed > 0) return `<span class="q-warn" title="${tip}">失敗 ${ev.failed} 卷</span>`;
+  return '';
+}
+
+function renderGroupTags(g) {
+  return (g.top_tags || []).slice(0, 3).map(t => `<span class="q-tag" title="此類有乾淨的${escapeHtml(t)}在售">${escapeHtml(t)}</span>`).join('');
+}
+
+function initStats() {
+  const eqCount = MARKET_DATA.equip.reduce((acc, g) => acc + g.children.length, 0);
+  const itCount = MARKET_DATA.item.reduce((acc, g) => acc + g.children.length, 0);
+  const soldQty = MARKET_DATA.sold.reduce((acc, g) => acc + (g.total_sold_qty || 0), 0);
+
+  document.getElementById('stat-total-records').innerText = (eqCount + itCount).toLocaleString();
+  document.getElementById('stat-equip-records').innerText = `${eqCount} 件 (${MARKET_DATA.equip.length} 種)`;
+  document.getElementById('stat-item-records').innerText = `${itCount} 筆 (${MARKET_DATA.item.length} 種)`;
+  document.getElementById('stat-sold-records').innerText = `${soldQty} 件 (${MARKET_DATA.sold.length} 種)`;
+  document.getElementById('stat-update-time').innerText = MARKET_DATA.exported_at || '-';
+
+  document.getElementById('equipTabBadge').innerText = MARKET_DATA.equip.length;
+  document.getElementById('itemTabBadge').innerText = MARKET_DATA.item.length;
+  document.getElementById('soldTabBadge').innerText = MARKET_DATA.sold.length;
+}
+
+// Render Equipments Table
+function renderEquipTable() {
+  const tbody = document.getElementById('tbody-equip');
+  tbody.innerHTML = '';
+
+  const q = searchQuery.toLowerCase().trim();
+  let groups = MARKET_DATA.equip.filter(g => {
+    if (!q) return true;
+    if (g.item_name.toLowerCase().includes(q)) return true;
+    if (g.min_seller && g.min_seller.toLowerCase().includes(q)) return true;
+    return g.children.some(c => 
+      (c.seller_name && c.seller_name.toLowerCase().includes(q)) ||
+      (c.tooltip_text && c.tooltip_text.toLowerCase().includes(q))
+    );
+  });
+
+  // Sort
+  const sort = sortStates.equip;
+  groups.sort((a, b) => {
+    let va = a[sort.col];
+    let vb = b[sort.col];
+    if (va === null || va === undefined) va = sort.asc ? 999999999999 : -1;
+    if (vb === null || vb === undefined) vb = sort.asc ? 999999999999 : -1;
+    if (typeof va === 'string') {
+      return sort.asc ? va.localeCompare(vb, 'zh-TW') : vb.localeCompare(va, 'zh-TW');
+    }
+    return sort.asc ? va - vb : vb - va;
+  });
+
+  groups.forEach((g, gIdx) => {
+    const parentId = `eq-grp-${gIdx}`;
+
+    const firstImg = (g.children.find(c => c.tooltip_img_rel) || {}).tooltip_img_rel || '';
+    const camIcon = firstImg ? `<span class="cam-badge" title="懸停或點擊檢視原圖 Tooltip">📷</span>` : '';
+
+    const trParent = document.createElement('tr');
+    trParent.className = 'group-parent';
+    trParent.dataset.target = parentId;
+    if (firstImg) {
+      trParent.dataset.tooltipImg = firstImg;
+      trParent.dataset.tooltipName = `${g.item_name} (最低價 ${formatNum(g.min_price)})`;
+    }
+
+    trParent.innerHTML = `
+      <td class="col-name">
+        <span class="tree-toggle">▶</span>
+        ${camIcon}
+        <span>${escapeHtml(g.item_name)}</span>
+        <span style="color: var(--text-muted); font-size: 11px; margin-left: 6px;">(${g.count} 件${g.sold_count ? `，已售 ${g.total_sold_qty}` : ''})</span>
+        ${renderGroupTags(g)}
+      </td>
+      <td class="col-price price-min">最低 ${formatNum(g.min_price)}</td>
+      <td class="col-loc">最低於 ${escapeHtml(g.min_location || '-')}</td>
+      <td class="col-seller">${escapeHtml(g.min_seller || '')}</td>
+      ${renderStatCell(g.max_str, 'stat-str')}
+      ${renderStatCell(g.max_dex, 'stat-dex')}
+      ${renderStatCell(g.max_int, 'stat-int')}
+      ${renderStatCell(g.max_luk, 'stat-luk')}
+      ${renderStatCell(g.max_atk, 'stat-atk')}
+      ${renderStatCell(g.max_matk, 'stat-matk')}
+      ${renderSlotCell(g.max_slots, g.base_eval)}
+      <td class="col-price" style="color: #e6e8ea;">${formatNum(g.median_price)}</td>
+      <td class="col-price price-avg">${formatNum(g.avg_price)}</td>
+      <td style="color: #90a4ae; font-size: 11.5px;">${escapeHtml(formatTime(g.latest_time))}</td>
+    `;
+
+    tbody.appendChild(trParent);
+
+    // Children Rows
+    g.children.forEach((c, cIdx) => {
+      const trChild = document.createElement('tr');
+      trChild.className = `group-child ${parentId}`;
+
+
+      const cImg = c.tooltip_img_rel || '';
+      if (cImg) {
+        trChild.dataset.tooltipImg = cImg;
+        trChild.dataset.tooltipName = `${c.item_name} (${c.location} - ${c.seller_name})`;
+      }
+
+      const childCam = cImg ? `<span class="cam-badge" title="檢視 Tooltip 原圖">📷</span>` : '';
+      let ttBtn = '';
+      if (c.tooltip_img_rel || c.tooltip_text) {
+        ttBtn = `<span class="tt-tag" onclick="event.stopPropagation(); openDetailModal(${registerDetail(c)})">🔍 詳情</span>`;
+      }
+
+      trChild.innerHTML = `
+        <td style="padding-left: 32px; color: #cfd8dc;">
+          <span style="color: var(--c-yellow); font-family: monospace; margin-right: 4px;">#${cIdx + 1}</span>
+          ${childCam}
+          ${escapeHtml(c.item_name)}${renderQuality(c.base_eval)}
+          ${c.is_sold ? `<span class="status-badge status-sold">已售出</span>` : ''}
+        </td>
+        <td class="col-price price-child">${formatNum(c.price)}</td>
+        <td class="col-loc">${escapeHtml(c.location || '-')}</td>
+        <td class="col-seller">${escapeHtml(c.seller_name || '')}</td>
+        ${renderStatCell(c.str_stat, 'stat-str', statOf(c, 'str_stat'))}
+        ${renderStatCell(c.dex_stat, 'stat-dex', statOf(c, 'dex_stat'))}
+        ${renderStatCell(c.int_stat, 'stat-int', statOf(c, 'int_stat'))}
+        ${renderStatCell(c.luk_stat, 'stat-luk', statOf(c, 'luk_stat'))}
+        ${renderStatCell(c.atk_stat, 'stat-atk', statOf(c, 'atk_stat'))}
+        ${renderStatCell(c.matk_stat, 'stat-matk', statOf(c, 'matk_stat'))}
+        ${renderSlotCell(c.scroll_slots, c.base_eval)}
+        <td class="col-price" style="text-align: center; color: #546e7a;">-</td>
+        <td class="col-price" style="text-align: center; color: #546e7a;">-</td>
+        <td class="col-tooltip">
+          ${ttBtn}
+          <span>${escapeHtml(c.tooltip_text || formatTime(c.updated_at))}</span>
+        </td>
+      `;
+      tbody.appendChild(trChild);
+    });
+  });
+}
+
+// Render General Items Table
+function renderItemTable() {
+  const tbody = document.getElementById('tbody-item');
+  tbody.innerHTML = '';
+
+  const q = searchQuery.toLowerCase().trim();
+  let groups = MARKET_DATA.item.filter(g => {
+    if (!q) return true;
+    if (g.item_name.toLowerCase().includes(q)) return true;
+    if (g.min_seller && g.min_seller.toLowerCase().includes(q)) return true;
+    return g.children.some(c => 
+      (c.seller_name && c.seller_name.toLowerCase().includes(q))
+    );
+  });
+
+  const sort = sortStates.item;
+  groups.sort((a, b) => {
+    let va = a[sort.col];
+    let vb = b[sort.col];
+    if (va === null || va === undefined) va = sort.asc ? 999999999999 : -1;
+    if (vb === null || vb === undefined) vb = sort.asc ? 999999999999 : -1;
+    if (typeof va === 'string') {
+      return sort.asc ? va.localeCompare(vb, 'zh-TW') : vb.localeCompare(va, 'zh-TW');
+    }
+    return sort.asc ? va - vb : vb - va;
+  });
+
+  groups.forEach((g, gIdx) => {
+    const parentId = `it-grp-${gIdx}`;
+    let statusHtml = '';
+    if (g.sold_count > 0) {
+      statusHtml = `<span class="status-badge status-sold">在售 ${g.total_qty} | 已售 ${g.total_sold_qty}</span>`;
+    } else {
+      statusHtml = `<span class="status-badge status-sale">在售共 ${g.total_qty} 個</span>`;
+    }
+
+    const firstImg = (g.children.find(c => c.tooltip_img_rel) || {}).tooltip_img_rel || '';
+    const camIcon = firstImg ? `<span class="cam-badge" title="懸停或點擊檢視原圖 Tooltip">📷</span>` : '';
+
+    const trParent = document.createElement('tr');
+    trParent.className = 'group-parent';
+    trParent.dataset.target = parentId;
+    if (firstImg) {
+      trParent.dataset.tooltipImg = firstImg;
+      trParent.dataset.tooltipName = `${g.item_name} (最低價 ${formatNum(g.min_price)})`;
+    }
+
+    trParent.innerHTML = `
+      <td class="col-name col-name-item">
+        <span class="tree-toggle">▶</span>
+        ${camIcon}
+        <span>${escapeHtml(g.item_name)}</span>
+        <span style="color: var(--text-muted); font-size: 11px; margin-left: 6px;">(${g.count} 攤)</span>
+      </td>
+      <td class="col-price price-min">最低 ${formatNum(g.min_price)}</td>
+      <td class="col-status">${statusHtml}</td>
+      <td class="col-loc">最低於 ${escapeHtml(g.min_location || '-')}</td>
+      <td class="col-seller">${escapeHtml(g.min_seller || '')}</td>
+      <td class="col-price" style="color: #fff;">${formatNum(g.median_price)}</td>
+      <td class="col-price price-avg">${formatNum(g.avg_price)}</td>
+      <td class="col-price" style="color: #ef9a9a;">${formatNum(g.max_price)}</td>
+      <td style="color: #90caf9; font-size: 11.5px;">共 ${g.count} 攤 (${escapeHtml(formatTime(g.latest_time))})</td>
+    `;
+    tbody.appendChild(trParent);
+
+    g.children.forEach((c, cIdx) => {
+      const trChild = document.createElement('tr');
+      trChild.className = `group-child ${parentId}`;
+
+      let childStatus = '';
+      if (c.is_sold) {
+        childStatus = `<span class="status-badge status-sold">已售出 (${c.sold_qty || 1}個)</span>`;
+      } else {
+        childStatus = `<span class="status-badge status-sale">在售 (x${c.quantity || 1})</span>`;
+      }
+
+      const cImg = c.tooltip_img_rel || '';
+      if (cImg) {
+        trChild.dataset.tooltipImg = cImg;
+        trChild.dataset.tooltipName = `${c.item_name} (${c.location} - ${c.seller_name})`;
+      }
+
+      const childCam = cImg ? `<span class="cam-badge" title="檢視 Tooltip 原圖">📷</span>` : '';
+      let ttBtn = '';
+      if (c.tooltip_img_rel || c.tooltip_text) {
+        ttBtn = `<span class="tt-tag" onclick="event.stopPropagation(); openDetailModal(${registerDetail(c)})">🔍 詳情</span>`;
+      }
+
+      trChild.innerHTML = `
+        <td style="padding-left: 32px; color: #cfd8dc;">
+          <span style="color: var(--c-yellow); font-family: monospace; margin-right: 4px;">#${cIdx + 1}</span>
+          ${childCam}
+          ${escapeHtml(c.item_name)}${renderQuality(c.base_eval)}
+        </td>
+        <td class="col-price price-child">${formatNum(c.price)}</td>
+        <td class="col-status">${childStatus}</td>
+        <td class="col-loc">${escapeHtml(c.location || '-')}</td>
+        <td class="col-seller">${escapeHtml(c.seller_name || '')}</td>
+        <td class="col-price" style="text-align: center; color: #546e7a;">-</td>
+        <td class="col-price" style="text-align: center; color: #546e7a;">-</td>
+        <td class="col-price" style="text-align: center; color: #546e7a;">-</td>
+        <td class="col-tooltip">
+          ${ttBtn}
+          <span>${escapeHtml(c.tooltip_text || formatTime(c.updated_at))}</span>
+        </td>
+      `;
+      tbody.appendChild(trChild);
+    });
+  });
+}
+
+// Render Sold Items Table
+function renderSoldTable() {
+  const tbody = document.getElementById('tbody-sold');
+  tbody.innerHTML = '';
+
+  const q = searchQuery.toLowerCase().trim();
+  let groups = MARKET_DATA.sold.filter(g => {
+    if (!q) return true;
+    if (g.item_name.toLowerCase().includes(q)) return true;
+    if (g.min_seller && g.min_seller.toLowerCase().includes(q)) return true;
+    return g.children.some(c => 
+      (c.seller_name && c.seller_name.toLowerCase().includes(q))
+    );
+  });
+
+  const sort = sortStates.sold;
+  groups.sort((a, b) => {
+    let va = a[sort.col];
+    let vb = b[sort.col];
+    if (va === null || va === undefined) va = sort.asc ? 999999999999 : -1;
+    if (vb === null || vb === undefined) vb = sort.asc ? 999999999999 : -1;
+    if (typeof va === 'string') {
+      return sort.asc ? va.localeCompare(vb, 'zh-TW') : vb.localeCompare(va, 'zh-TW');
+    }
+    return sort.asc ? va - vb : vb - va;
+  });
+
+  groups.forEach((g, gIdx) => {
+    const parentId = `so-grp-${gIdx}`;
+
+    const firstImg = (g.children.find(c => c.tooltip_img_rel) || {}).tooltip_img_rel || '';
+    const camIcon = firstImg ? `<span class="cam-badge" title="懸停或點擊檢視原圖 Tooltip">📷</span>` : '';
+
+    const trParent = document.createElement('tr');
+    trParent.className = 'group-parent';
+    trParent.dataset.target = parentId;
+    if (firstImg) {
+      trParent.dataset.tooltipImg = firstImg;
+      trParent.dataset.tooltipName = `${g.item_name} (成交紀錄)`;
+    }
+
+    trParent.innerHTML = `
+      <td class="col-name col-name-sold">
+        <span class="tree-toggle">▶</span>
+        ${camIcon}
+        <span>${escapeHtml(g.item_name)}</span>
+        <span style="color: var(--text-muted); font-size: 11px; margin-left: 6px;">(${g.sold_count} 筆成交)</span>
+      </td>
+      <td class="col-status">
+        <span class="status-badge" style="background: rgba(255, 82, 82, 0.2); color: #ff5252; font-weight: 700;">
+          已售出 ${g.total_sold_qty} 個
+        </span>
+      </td>
+      <td class="col-price price-min">最低 ${formatNum(g.min_price)}</td>
+      <td class="col-status">
+        <span style="color: ${g.total_rem_qty > 0 ? '#69f0ae' : '#78909c'};">
+          ${g.total_rem_qty > 0 ? `仍有 ${g.total_rem_qty} 在售` : '皆已售罄'}
+        </span>
+      </td>
+      <td class="col-loc">${escapeHtml(g.min_location || '-')}</td>
+      <td class="col-seller">${escapeHtml(g.min_seller || '')}</td>
+      <td class="col-price" style="color: #fff;">${formatNum(g.median_price)}</td>
+      <td class="col-price price-avg">${formatNum(g.avg_price)}</td>
+      <td class="col-price" style="color: #ef9a9a;">${formatNum(g.max_price)}</td>
+      <td style="color: #ffd54f; font-size: 11.5px;">${escapeHtml(formatTime(g.latest_time))}</td>
+    `;
+    tbody.appendChild(trParent);
+
+    g.children.forEach((c, cIdx) => {
+      const trChild = document.createElement('tr');
+      trChild.className = `group-child ${parentId}`;
+
+      const cImg = c.tooltip_img_rel || '';
+      if (cImg) {
+        trChild.dataset.tooltipImg = cImg;
+        trChild.dataset.tooltipName = `${c.item_name} (成交紀錄)`;
+      }
+
+      const childCam = cImg ? `<span class="cam-badge" title="檢視 Tooltip 原圖">📷</span>` : '';
+      let ttBtn = '';
+      if (c.tooltip_img_rel || c.tooltip_text) {
+        ttBtn = `<span class="tt-tag" onclick="event.stopPropagation(); openDetailModal(${registerDetail(c)})">🔍 詳情</span>`;
+      }
+
+      trChild.innerHTML = `
+        <td style="padding-left: 32px; color: #cfd8dc;">
+          <span style="color: var(--c-yellow); font-family: monospace; margin-right: 4px;">#${cIdx + 1}</span>
+          ${childCam}
+          ${escapeHtml(c.item_name)}${renderQuality(c.base_eval)}
+        </td>
+        <td class="col-status">
+          <span class="status-badge status-sold">成交 x${c.sold_qty || 1}</span>
+        </td>
+        <td class="col-price price-child">${formatNum(c.price)}</td>
+        <td class="col-status" style="color: ${c.quantity > 0 ? '#69f0ae' : '#78909c'};">
+          ${c.quantity > 0 ? `剩 ${c.quantity} 個` : '售罄'}
+        </td>
+        <td class="col-loc">${escapeHtml(c.location || '-')}</td>
+        <td class="col-seller">${escapeHtml(c.seller_name || '')}</td>
+        <td class="col-price" style="text-align: center; color: #546e7a;">-</td>
+        <td class="col-price" style="text-align: center; color: #546e7a;">-</td>
+        <td class="col-price" style="text-align: center; color: #546e7a;">-</td>
+        <td class="col-tooltip">
+          ${ttBtn}
+          <span>${escapeHtml(c.tooltip_text || formatTime(c.updated_at))}</span>
+        </td>
+      `;
+      tbody.appendChild(trChild);
+    });
+  });
+}
+
+
+// ===== 熱門行情 =====
+sortStates.hot = { col: 'rank', asc: true };
+
+function hotPayload() {
+  const d = (typeof marketData !== 'undefined') ? marketData : MARKET_DATA;
+  return (d && d.hot) || { items: [] };
+}
+
+function hotTime(bucket) {
+  return new Date(bucket.replace(' ', 'T') + ':00').getTime();
+}
+
+// Lowest price of the newest record at least `hours` older than the latest one
+function hotPriceAgo(hist, hours) {
+  if (!hist.length) return null;
+  const target = hotTime(hist[hist.length - 1][0]) - hours * 3600 * 1000;
+  for (let i = hist.length - 1; i >= 0; i--) {
+    if (hotTime(hist[i][0]) <= target) return hist[i][3];
+  }
+  return null;
+}
+
+function hotChange(now, then) {
+  return now && then ? (now - then) / then : null;
+}
+
+function hotChangeHtml(chg) {
+  if (chg === null || chg === undefined) return '<span class="hot-dim">-</span>';
+  const pct = (chg * 100).toFixed(1);
+  if (Math.abs(chg) < 0.0005) return '<span class="hot-dim">0.0%</span>';
+  return chg > 0 ? `<span class="hot-up">▲ ${pct}%</span>` : `<span class="hot-down">▼ ${Math.abs(pct)}%</span>`;
+}
+
+function hotSparkline(hist) {
+  const since = hist.length ? hotTime(hist[hist.length - 1][0]) - 7 * 24 * 3600 * 1000 : 0;
+  const pts = hist.filter(h => hotTime(h[0]) >= since);
+  if (pts.length < 2) return '<span class="hot-dim">紀錄不足</span>';
+  const W = 130, H = 30, pad = 2;
+  const t0 = hotTime(pts[0][0]), t1 = hotTime(pts[pts.length - 1][0]);
+  const vals = pts.flatMap(h => [h[3], h[4]]);
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const x = t => pad + (t1 > t0 ? (hotTime(t) - t0) / (t1 - t0) : 0.5) * (W - 2 * pad);
+  // Log scale: one troll listing should not flatten the rest of the line
+  const ly = v => Math.log10(Math.max(1, v));
+  const y = v => hi > lo ? H - pad - (ly(v) - ly(lo)) / (ly(hi) - ly(lo)) * (H - 2 * pad) : H / 2;
+  const line = idx => pts.map(h => `${x(h[0]).toFixed(1)},${y(h[idx]).toFixed(1)}`).join(' ');
+  const first = pts[0][3], last = pts[pts.length - 1][3];
+  const color = last > first ? 'var(--c-orange)' : (last < first ? 'var(--c-green)' : 'var(--c-accent)');
+  return `<svg class="hot-spark" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+    <polyline points="${line(4)}" fill="none" stroke="#78909c" stroke-width="1" stroke-dasharray="3 2"/>
+    <polyline points="${line(3)}" fill="none" stroke="${color}" stroke-width="1.6"/>
+  </svg>`;
+}
+
+function hotRows() {
+  return hotPayload().items.map(it => {
+    const hist = it.history || [];
+    const last = hist.length ? hist[hist.length - 1] : null;
+    const cur = it.current;
+    const min = cur ? cur.min_price : null;
+    const lows = hist.map(h => h[3]);
+    return {
+      rank: it.rank, name: it.name, hist: hist, cur: cur,
+      min_price: min,
+      median_price: cur ? cur.median_price : null,
+      listings: cur ? cur.listings : 0,
+      chg24: hotChange(min, hotPriceAgo(hist, 24)),
+      chg7d: hotChange(min, hotPriceAgo(hist, 24 * 7)),
+      low30: lows.length ? Math.min(...lows) : null,
+      high30: lows.length ? Math.max(...lows) : null,
+      last_bucket: last ? last[0] : '',
+    };
+  });
+}
+
+// One row per day: that day's lowest price, and the closing median / listing count
+function hotDaily(hist) {
+  const days = new Map();
+  hist.forEach(h => {
+    const day = h[0].slice(0, 10);
+    const d = days.get(day);
+    if (!d) days.set(day, { day: day, low: h[3], high: h[3], median: h[4], listings: h[1], qty: h[2], n: 1 });
+    else Object.assign(d, { low: Math.min(d.low, h[3]), high: Math.max(d.high, h[3]), median: h[4], listings: h[1], qty: h[2], n: d.n + 1 });
+  });
+  return [...days.values()];
+}
+
+function updateHotBadge() {
+  const el = document.getElementById('hotTabBadge');
+  if (el) el.innerText = hotPayload().items.length;
+}
+
+function renderHotTable() {
+  const tbody = document.getElementById('tbody-hot');
+  tbody.innerHTML = '';
+  const p = hotPayload();
+  document.getElementById('hot-source-date').innerText = p.updated ? `（榜單 ${p.updated}）` : '';
+  const q = searchQuery.toLowerCase().trim();
+  const sort = sortStates.hot;
+  const rows = hotRows().filter(r => !q || r.name.toLowerCase().includes(q));
+  rows.sort((a, b) => {
+    let va = a[sort.col], vb = b[sort.col];
+    if (va === null || va === undefined) va = sort.asc ? Infinity : -Infinity;
+    if (vb === null || vb === undefined) vb = sort.asc ? Infinity : -Infinity;
+    if (typeof va === 'string') return sort.asc ? va.localeCompare(vb, 'zh-TW') : vb.localeCompare(va, 'zh-TW');
+    return sort.asc ? va - vb : vb - va;
+  });
+
+  rows.forEach(r => {
+    const parentId = `hot-grp-${r.rank}`;
+    const tr = document.createElement('tr');
+    tr.className = 'group-parent';
+    tr.dataset.target = parentId;
+    const none = '<span class="hot-dim">目前無人上架</span>';
+    tr.innerHTML = `
+      <td class="col-name">
+        <span class="tree-toggle">▶</span>
+        <span class="hot-rank">#${r.rank}</span>
+        <span>${escapeHtml(r.name)}</span>
+      </td>
+      <td class="col-price" style="color: #e6e8ea;">${r.cur ? formatNum(r.min_price) : none}</td>
+      <td class="col-price">${r.cur ? formatNum(r.median_price) : '-'}</td>
+      <td style="text-align: center;">${r.cur ? `${r.cur.listings} 筆 / ${r.cur.total_qty} 個` : '-'}</td>
+      <td class="col-price">${hotChangeHtml(r.chg24)}</td>
+      <td class="col-price">${hotChangeHtml(r.chg7d)}</td>
+      <td class="col-price">${r.low30 !== null ? `${formatNum(r.low30)} ~ ${formatNum(r.high30)}` : '-'}</td>
+      <td>${hotSparkline(r.hist)}</td>
+      <td style="color: #78909c; font-size: 12px;">${r.last_bucket ? escapeHtml(r.last_bucket) + ` <span class="hot-dim">(${r.hist.length} 筆)</span>` : '<span class="hot-dim">尚無紀錄</span>'}</td>
+    `;
+    tbody.appendChild(tr);
+
+    const days = hotDaily(r.hist);
+    days.slice(-14).reverse().forEach((d, i, arr) => {
+      const prev = arr[i + 1] || null;
+      const trc = document.createElement('tr');
+      trc.className = `group-child ${parentId}`;
+      trc.innerHTML = `
+        <td style="padding-left: 32px; color: #cfd8dc;">${escapeHtml(d.day)} <span class="hot-dim" style="font-size: 11px;">${d.n} 次紀錄</span></td>
+        <td class="col-price price-child" title="當日最低價">${formatNum(d.low)}</td>
+        <td class="col-price" title="當日最後一筆的中位價">${formatNum(d.median)}</td>
+        <td style="text-align: center;">${d.listings} 筆 / ${d.qty} 個</td>
+        <td class="col-price" title="對比前一個有紀錄的日子">${hotChangeHtml(prev ? hotChange(d.low, prev.low) : null)}</td>
+        <td></td>
+        <td class="col-price" style="color: #90a4ae;" title="當日最低價的最低與最高">${formatNum(d.low)} ~ ${formatNum(d.high)}</td>
+        <td></td>
+        <td></td>
+      `;
+      tbody.appendChild(trc);
+    });
+  });
+}
+
+
+
+// ===== 攻擊價差 =====
+const ATK_TYPES = {
+  100: '帽子', 101: '臉飾', 102: '眼飾', 103: '耳環', 104: '上衣', 105: '套服', 106: '褲裙',
+  107: '鞋子', 108: '手套', 109: '盾牌', 110: '披風', 111: '戒指', 112: '項鍊', 113: '腰帶', 114: '勳章',
+  130: '單手劍', 131: '單手斧', 132: '單手棍', 133: '短刀', 137: '短杖', 138: '長杖',
+  140: '雙手劍', 141: '雙手斧', 142: '雙手棍', 143: '槍', 144: '矛', 145: '弓', 146: '弩',
+  147: '拳套', 148: '指虎', 149: '火槍',
+};
+const ATK_MAGIC_TYPES = new Set([137, 138]);
+// A stall ask caps at 2,147,483,647 mesos; asks this high are placeholders for gear priced in WS (祝福卷軸)
+const ATK_CAP_PRICE = 1900000000;
+// From here on an estimate is also shown in WS, at the current cheapest 祝福卷軸 ask
+const ATK_WS_FROM = 500000000;
+// Regressors, in the order they get dropped (last first) when there are too few points
+const ATK_VARS = ['extra', 'up', 'failed'];
+let atkMode = 'item';
+let atkUseHistory = true;
+let scrollUseBless = false;
+sortStates.atk = { col: 'n', asc: false };
+sortStates.scroll = { col: 'full_net', asc: false };
+
+function atkData() {
+  return (typeof marketData !== 'undefined') ? marketData : MARKET_DATA;
+}
+
+function atkEquipGroups() {
+  const d = atkData();
+  return (d && d.equip) || [];
+}
+
+// Off-shelf listings, unpacked into the same shape as a shelf listing (no tooltip, flagged hist)
+function atkHistoryRows() {
+  const h = atkData() && atkData().atk_history;
+  if (!h || !h.rows) return [];
+  return h.rows.map(r => ({
+    hist: true, base_eval: h.bases[r[0]], item_name: r[1], price: r[2],
+    atk_stat: r[3], matk_stat: r[4], int_stat: r[5], scroll_slots: r[6],
+    location: r[7], seller_name: r[8], is_sold: r[9], first_seen: r[10], last_seen: r[11],
+  })).filter(c => c.base_eval);
+}
+
+function updateAtkHistoryLabel() {
+  const h = atkData() && atkData().atk_history;
+  const days = document.getElementById('atkHistDays');
+  const cnt = document.getElementById('atkHistCount');
+  if (days && h && h.days) days.innerText = h.days;
+  if (cnt) cnt.innerText = h && h.rows ? h.rows.length : 0;
+}
+
+function atkIsCapped(price) {
+  return price >= ATK_CAP_PRICE;
+}
+
+function atkWsRate() {
+  const d = atkData();
+  const b = d && d.scrolls && d.scrolls.scrolls ? d.scrolls.scrolls.find(s => s.kind === 'protect') : null;
+  return b && b.price ? b.price : null;
+}
+
+// '1,234,567,890 ≈ 1.0 WS' once the value is large enough for WS pricing
+function atkWsHtml(v) {
+  if (v === null || v === undefined || isNaN(v)) return '-';
+  const rate = atkWsRate();
+  let out = formatNum(Math.round(v));
+  if (rate && Math.abs(v) >= ATK_WS_FROM) out += ` <span style="font-size: 11px; color: #80cbc4;">≈ ${(v / rate).toFixed(1)} WS</span>`;
+  return out;
+}
+
+function atkUpgradeOf(name) {
+  const m = /\(\s*\+\s*(\d+)\s*\)\s*$/.exec(name || '');
+  return m ? parseInt(m[1], 10) : 0;
+}
+
+// Centers k-dimensional points so the regression runs through the origin
+function atkCenter(pts, k) {
+  const n = pts.length;
+  const m = [];
+  for (let i = 0; i < k; i++) m.push(pts.reduce((a, p) => a + p.x[i], 0) / n);
+  const my = pts.reduce((a, p) => a + p.y, 0) / n;
+  return { m: m, my: my, pts: pts.map(p => ({ x: p.x.map((v, i) => v - m[i]), y: p.y - my })) };
+}
+
+// Least squares y = Σ b_i x_i on centered points. A variable is dropped when it varies on fewer than 3 points, when
+// it is (nearly) a combination of the earlier ones (its pivot collapses below 2% of its own
+// variance), or, from the last one back, while there are fewer than (variables + 3) points.
+function atkFitN(pts, k) {
+  const n = pts.length;
+  let active = [];
+  for (let i = 0; i < k; i++) {
+    // A variable that differs from its most common value on fewer than 3 points can't carry a coefficient
+    const cnt = new Map();
+    pts.forEach(p => cnt.set(p.x[i], (cnt.get(p.x[i]) || 0) + 1));
+    if (n - Math.max(...cnt.values()) >= 3) active.push(i);
+  }
+  let syy = 0;
+  pts.forEach(p => { syy += p.y * p.y; });
+  if (syy < 1e-12) return null;
+  while (active.length) {
+    if (n < active.length + 3) { active.pop(); continue; }
+    const m = active.length;
+    const M = active.map(i => {
+      const row = active.map(j => { let s = 0; pts.forEach(p => { s += p.x[i] * p.x[j]; }); return s; });
+      let sy = 0;
+      pts.forEach(p => { sy += p.x[i] * p.y; });
+      row.push(sy);
+      return row;
+    });
+    const diag = M.map((r, i) => r[i]);
+    let dropped = -1;
+    for (let c = 0; c < m; c++) {
+      if (M[c][c] < 0.02 * diag[c]) { dropped = c; break; }
+      for (let r = c + 1; r < m; r++) {
+        const f = M[r][c] / M[c][c];
+        for (let j = c; j <= m; j++) M[r][j] -= f * M[c][j];
+      }
+    }
+    if (dropped >= 0) { active.splice(dropped, 1); continue; }
+    const coef = new Array(m).fill(0);
+    for (let c = m - 1; c >= 0; c--) {
+      let s = M[c][m];
+      for (let j = c + 1; j < m; j++) s -= M[c][j] * coef[j];
+      coef[c] = s / M[c][c];
+    }
+    const b = new Array(k).fill(null);
+    let r2 = 0;
+    active.forEach((i, idx) => {
+      b[i] = coef[idx];
+      let sy = 0;
+      pts.forEach(p => { sy += p.x[i] * p.y; });
+      r2 += coef[idx] * sy;
+    });
+    return { b: b, r2: Math.max(0, Math.min(1, r2 / syy)) };
+  }
+  return null;
+}
+
+function atkPredictor(cen, fit) {
+  if (!fit) return null;
+  return x => Math.pow(10, cen.my + x.reduce((a, v, i) => a + (fit.b[i] || 0) * (v - cen.m[i]), 0));
+}
+
+function atkMult(fit, i) {
+  return fit && fit.b[i] !== null ? Math.pow(10, fit.b[i]) : null;
+}
+
+function atkMedian(arr) {
+  const s = arr.slice().sort((a, b) => a - b);
+  const m = s.length >> 1;
+  return s.length ? (s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2)) : null;
+}
+
+function atkAnalyzeItems() {
+  // Bucket every listing by base item id so the "(+N)" scrolled copies join their clean siblings
+  const buckets = new Map();
+  const listings = [].concat(...atkEquipGroups().map(g => g.children));
+  updateAtkHistoryLabel();
+  if (atkUseHistory) listings.push(...atkHistoryRows());
+  listings.forEach(c => {
+    const ev = c.base_eval;
+    if (!ev || !ev.item_id || !(c.price > 0)) return;
+    if (!buckets.has(ev.item_id)) buckets.set(ev.item_id, { ev: ev, names: new Map(), list: [] });
+    const b = buckets.get(ev.item_id);
+    const base = c.item_name.replace(/\s*\(\+\d+\)\s*$/, '');
+    b.names.set(base, (b.names.get(base) || 0) + 1);
+    b.list.push(c);
+  });
+
+  const out = [];
+  buckets.forEach(b => {
+    const ev = b.ev;
+    const prefix = Math.floor(ev.item_id / 10000);
+    const type = ATK_TYPES[prefix];
+    if (!type) return;
+    // Random-stat gear (belts, necklaces…) lists different stat lines per copy, so read the clean
+    // base over every copy; a stat whose base is 0 is a random roll, not part of the item
+    const statOf = (k, f) => Math.max(0, ...b.list.map(c => {
+      const st = c.base_eval.stats && c.base_eval.stats[k];
+      return st ? (st[f] || 0) : 0;
+    }));
+    const baseOf = k => statOf(k, 'base');
+    // Wands/staves, and gear built on magic attack alone, are mage gear: judge them by 魔攻 + 智力
+    const magic = ATK_MAGIC_TYPES.has(prefix) || (baseOf('matk_stat') > 0 && baseOf('atk_stat') === 0);
+    const key = magic ? 'matk_stat' : 'atk_stat';
+    const hasBase = baseOf(key) > 0;
+    const intBase = baseOf('int_stat');
+    const baseTotal = baseOf(key) + (magic ? intBase : 0);
+    // WZ upper bound of the random roll, for the 頂比平 column
+    const maxTotal = statOf(key, 'max') + (magic ? statOf('int_stat', 'max') : 0);
+    const tuc = ev.tuc || 0;
+    const rows = b.list.map(c => {
+      let v = c[key];
+      // Gear without this stat shows no line for it; a weapon's missing attack is an OCR miss
+      if ((v === null || v === undefined) && !hasBase) v = 0;
+      let intv = null;
+      if (magic && v !== null && v !== undefined) {
+        // 1 智力 = 1 魔攻; an unread 智力 line falls back to the clean base value
+        intv = (c.int_stat === null || c.int_stat === undefined) ? intBase : c.int_stat;
+        v += intv;
+      }
+      const sl = c.scroll_slots;
+      const slots = (sl === null || sl === undefined) ? null : sl;
+      const up = atkUpgradeOf(c.item_name);
+      const atk = (v === null || v === undefined) ? null : v;
+      return {
+        c: c, atk: atk, matk: magic ? c[key] : null, int: intv, slots: slots, up: up,
+        extra: atk === null ? null : atk - baseTotal,
+        failed: (slots === null || !tuc) ? null : Math.max(0, tuc - slots - up),
+      };
+    });
+    // Capped asks are lower bounds (the real price is in WS), so they never shape the fit
+    const valid = rows.filter(r => r.extra !== null && r.failed !== null && !atkIsCapped(r.c.price));
+    if (!valid.length || !rows.some(r => r.atk > 0)) return;
+    const cen = atkCenter(valid.map(r => ({ x: [r.extra, r.up, r.failed], y: Math.log10(r.c.price) })), ATK_VARS.length);
+    const fit = atkFitN(cen.pts, ATK_VARS.length);
+    const predict = atkPredictor(cen, fit);
+    let best = null;
+    rows.forEach(r => {
+      const ok = predict && r.extra !== null && r.failed !== null;
+      r.expected = ok ? predict([r.extra, r.up, r.failed]) : null;
+      r.capped = atkIsCapped(r.c.price);
+      r.ratio = r.expected && !r.capped ? r.c.price / r.expected : null;
+      // Only a listing still on the shelf can be bought
+      if (r.ratio !== null && !r.c.hist && (!best || r.ratio < best.ratio)) best = r;
+    });
+    const atks = rows.filter(r => r.atk !== null).map(r => r.atk);
+    const cappedN = rows.filter(r => r.capped).length;
+    const slots = rows.filter(r => r.slots !== null).map(r => r.slots);
+    const extras = valid.map(r => r.extra);
+    const name = [...b.names.entries()].sort((x, y) => y[1] - x[1])[0][0];
+    const median = atkMedian(valid.map(r => r.c.price));
+    const mult = atkMult(fit, 0);
+    const topRange = maxTotal - baseTotal;
+    out.push({
+      name: name, type: type, prefix: prefix, magic: magic, rows: rows, cen: cen, fit: fit, predict: predict,
+      base: baseTotal, key: key, tuc: tuc, req_level: ev.req_level || 0, n: valid.length,
+      atk_min: atks.length ? Math.min(...atks) : null, atk_max: atks.length ? Math.max(...atks) : null,
+      extra_min: Math.min(...extras), extra_max: Math.max(...extras),
+      slot_min: slots.length ? Math.min(...slots) : null, slot_max: slots.length ? Math.max(...slots) : null,
+      mult: mult, up_mult: atkMult(fit, 1), fail_mult: atkMult(fit, 2), r2: fit ? fit.r2 : null,
+      top_mult: mult && topRange > 0 ? Math.pow(10, fit.b[0] * topRange) : null, top_range: topRange,
+      median_price: median, capped_n: cappedN,
+      per_atk: mult && median ? median * (mult - 1) : null,
+      best: best, best_ratio: best ? best.ratio : null,
+    });
+  });
+  return out;
+}
+
+function atkAnalyzeTypes(items) {
+  const byType = {};
+  items.forEach(it => { (byType[it.prefix] = byType[it.prefix] || []).push(it); });
+  return Object.values(byType).map(list => {
+    // Pool each item's own centered points so different base prices / levels don't mix
+    const used = list.filter(it => it.n >= 2);
+    const pts = [].concat(...used.map(it => it.cen.pts));
+    const fit = atkFitN(pts, ATK_VARS.length);
+    const mult = atkMult(fit, 0);
+    const median = atkMedian(used.map(it => it.median_price).filter(Boolean));
+    const best = list.filter(it => it.best).sort((a, b) => a.best_ratio - b.best_ratio)[0] || null;
+    const vals = k => list.map(it => it[k]).filter(v => v !== null);
+    const topRanges = list.map(it => it.top_range).filter(v => v > 0);
+    const topRange = topRanges.length ? atkMedian(topRanges) : 0;
+    return {
+      name: list[0].type, type: list[0].type, items: list,
+      req_level: Math.max(...list.map(it => it.req_level)), req_level_min: Math.min(...list.map(it => it.req_level)),
+      n: pts.length,
+      atk_min: Math.min(...vals('atk_min')), atk_max: Math.max(...vals('atk_max')),
+      slot_min: vals('slot_min').length ? Math.min(...vals('slot_min')) : null,
+      slot_max: vals('slot_max').length ? Math.max(...vals('slot_max')) : null,
+      mult: mult, up_mult: atkMult(fit, 1), fail_mult: atkMult(fit, 2), r2: fit ? fit.r2 : null,
+      top_mult: mult && topRange > 0 ? Math.pow(10, fit.b[0] * topRange) : null,
+      median_price: median,
+      per_atk: mult && median ? median * (mult - 1) : null,
+      best: best ? best.best : null, best_ratio: best ? best.best_ratio : null,
+    };
+  });
+}
+
+function atkRange(a, b) {
+  if (a === null || a === undefined) return '<span class="atk-dim">-</span>';
+  return a === b ? `${a}` : `${a} ~ ${b}`;
+}
+
+function atkRatioHtml(ratio) {
+  if (ratio === null || ratio === undefined) return '<span class="atk-dim">-</span>';
+  const cls = ratio < 0.5 ? 'atk-deal' : (ratio > 2 ? 'atk-pricey' : '');
+  return `<span class="${cls}">×${ratio.toFixed(2)}</span>`;
+}
+
+function atkMultHtml(m, fitted) {
+  if (m) return `×${m.toFixed(2)}`;
+  return `<span class="atk-dim">${fitted ? '-' : '筆數不足'}</span>`;
+}
+
+function atkBestHtml(best) {
+  if (!best) return '<span class="atk-dim">-</span>';
+  const c = best.c;
+  return `${atkRatioHtml(best.ratio)} <span style="color: #cfd8dc;">${formatNum(c.price)}</span>
+    <span style="font-size: 11px; color: #78909c;">${escapeHtml(c.item_name)} ${best.int !== null ? '魔+智' : '攻'} ${best.atk}・卷 ${best.slots} ・ ${escapeHtml(c.location || '')} ${escapeHtml(c.seller_name || '')}</span>`;
+}
+
+function atkSortBy(list, sort) {
+  list.sort((a, b) => {
+    let va = a[sort.col], vb = b[sort.col];
+    if (va === null || va === undefined) va = sort.asc ? Infinity : -Infinity;
+    if (vb === null || vb === undefined) vb = sort.asc ? Infinity : -Infinity;
+    if (typeof va === 'string') return sort.asc ? va.localeCompare(vb, 'zh-TW') : vb.localeCompare(va, 'zh-TW');
+    return sort.asc ? va - vb : vb - va;
+  });
+  return list;
+}
+
+function atkSort(list) {
+  return atkSortBy(list, sortStates.atk);
+}
+
+// Shared cells of an item / type summary row (everything after the name cell)
+function atkSummaryCells(s, child) {
+  const fitted = s.r2 !== null;
+  const lv = s.req_level_min !== undefined && s.req_level_min !== s.req_level ? `${s.req_level_min}~${s.req_level}` : s.req_level;
+  const baseNote = s.base > 0 ? ` <span style="font-size: 11px; color: #78909c;">(底 ${s.base})</span>` : '';
+  return `
+    <td>${child ? '' : escapeHtml(s.type)}${s.magic ? ' <span style="color: var(--text-muted);">魔攻+智</span>' : ''}</td>
+    <td style="text-align: center;">${lv}</td>
+    <td style="text-align: center;">${s.n}</td>
+    <td style="text-align: center;">${atkRange(s.atk_min, s.atk_max)}${baseNote}</td>
+    <td style="text-align: center;">${atkRange(s.slot_min, s.slot_max)}</td>
+    <td class="col-price" style="color: var(--c-yellow);">${atkMultHtml(s.mult, fitted)}</td>
+    <td class="col-price" style="color: var(--c-yellow);">${atkMultHtml(s.up_mult, fitted)}</td>
+    <td class="col-price" style="color: var(--c-yellow);">${atkMultHtml(s.fail_mult, fitted)}</td>
+    <td class="col-price">${s.top_mult ? `×${s.top_mult.toFixed(2)}` : '<span class="atk-dim">-</span>'}</td>
+    <td class="col-price">${s.per_atk ? atkWsHtml(s.per_atk) : '-'}</td>
+    <td style="text-align: center;">${fitted ? s.r2.toFixed(2) : '-'}</td>
+    <td class="col-price ${child ? 'price-child' : ''}" style="${child ? '' : 'color: #e6e8ea;'}">${atkWsHtml(s.median_price)}</td>
+    <td>${atkBestHtml(s.best)}</td>
+  `;
+}
+
+function atkParentRow(tbody, parentId, s, sub) {
+  const tr = document.createElement('tr');
+  tr.className = 'group-parent';
+  tr.dataset.target = parentId;
+  tr.innerHTML = `
+    <td class="col-name">
+      <span class="tree-toggle">▶</span>
+      <span>${escapeHtml(s.name)}</span>
+      <span style="color: var(--text-muted); font-size: 11px; margin-left: 6px;">(${sub})</span>
+    </td>
+    ${atkSummaryCells(s, false)}
+  `;
+  tbody.appendChild(tr);
+}
+
+function updateAtkBadge() {
+  const el = document.getElementById('atkTabBadge');
+  if (!el) return;
+  const items = atkAnalyzeItems();
+  el.innerText = atkMode === 'type' ? atkAnalyzeTypes(items).length : items.length;
+  const sel = document.getElementById('scrollTabBadge');
+  if (sel) sel.innerText = scrollAnalyze(items).length;
+}
+
+function renderAtkTable() {
+  const tbody = document.getElementById('tbody-atk');
+  tbody.innerHTML = '';
+  const q = searchQuery.toLowerCase().trim();
+  const hit = it => !q || it.name.toLowerCase().includes(q) || it.type.includes(q);
+  const items = atkAnalyzeItems();
+
+  if (atkMode === 'type') {
+    const types = atkSort(atkAnalyzeTypes(items.filter(hit)));
+    document.getElementById('atkTabBadge').innerText = types.length;
+    types.forEach((t, tIdx) => {
+      const parentId = `atk-type-${tIdx}`;
+      atkParentRow(tbody, parentId, t, `${t.items.length} 種裝備`);
+      t.items.slice().sort((a, b) => b.n - a.n).forEach(it => {
+        const trc = document.createElement('tr');
+        trc.className = `group-child ${parentId}`;
+        trc.innerHTML = `<td style="padding-left: 32px; color: #cfd8dc;">${escapeHtml(it.name)}</td>${atkSummaryCells(it, true)}`;
+        tbody.appendChild(trc);
+      });
+    });
+    return;
+  }
+
+  const list = atkSort(items.filter(hit));
+  document.getElementById('atkTabBadge').innerText = list.length;
+  list.forEach((s, sIdx) => {
+    const parentId = `atk-grp-${sIdx}`;
+    const histN = s.rows.filter(r => r.c.hist).length;
+    const subParts = [`${s.rows.length} 件`];
+    if (histN) subParts.push(`含已下架 ${histN}`);
+    if (s.capped_n) subParts.push(`WS 計價 ${s.capped_n} 件未入回歸`);
+    atkParentRow(tbody, parentId, s, subParts.join('，'));
+    s.rows.slice().sort((a, b) => (b.atk ?? -1) - (a.atk ?? -1) || (b.slots ?? -1) - (a.slots ?? -1) || a.c.price - b.c.price).forEach((r, rIdx) => {
+      const c = r.c;
+      const trc = document.createElement('tr');
+      trc.className = `group-child ${parentId}${c.hist ? ' atk-hist' : ''}`;
+      if (c.tooltip_img_rel) {
+        trc.dataset.tooltipImg = c.tooltip_img_rel;
+        trc.dataset.tooltipName = `${c.item_name} (${c.location} - ${c.seller_name})`;
+      }
+      const ttBtn = (c.tooltip_img_rel || c.tooltip_text)
+        ? `<span class="tt-tag" onclick="event.stopPropagation(); openDetailModal(${registerDetail(c)})">🔍 詳情</span>` : '';
+      const miss = '<span class="atk-dim">未讀到</span>';
+      const extraNote = r.extra === null ? '' : ` <span style="font-size: 11px; color: ${r.extra > 0 ? 'var(--c-green)' : (r.extra < 0 ? 'var(--c-orange)' : '#78909c')};">(${r.extra >= 0 ? '+' : ''}${r.extra})</span>`;
+      const slotNote = r.failed === null ? '' : ` <span style="font-size: 11px; color: #78909c;">成 ${r.up}${r.failed ? `・敗 ${r.failed}` : ''}</span>`;
+      trc.innerHTML = `
+        <td style="padding-left: 32px; color: #cfd8dc;">
+          <span style="color: var(--c-yellow); font-family: monospace; margin-right: 4px;">#${rIdx + 1}</span>
+          ${escapeHtml(c.item_name)}
+          ${c.is_sold ? '<span class="status-badge status-sold">已售出</span>' : ''}
+          ${r.capped ? '<span class="status-badge" style="background: #263238; color: #80cbc4;" title="開價頂到楓幣上限，實際以祝福卷軸（WS）計價，不進回歸">WS 計價</span>' : ''}
+          ${c.hist ? `<span style="font-size: 11px; color: #78909c;">已下架 ${escapeHtml(c.first_seen.slice(5))}~${escapeHtml(c.last_seen.slice(5))}</span>` : ''}
+        </td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td style="text-align: center;">${r.atk === null ? miss : (s.magic
+          ? `${r.atk} <span style="font-size: 11px; color: #78909c;">(魔 ${r.matk ?? 0}+智 ${r.int})</span>` : r.atk)}${extraNote}</td>
+        <td style="text-align: center;">${r.slots !== null ? `${r.slots}${s.tuc ? ' / ' + s.tuc : ''}` : miss}${slotNote}</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="col-price" style="color: #90a4ae;">${r.expected ? atkWsHtml(r.expected) : '-'}</td>
+        <td></td>
+        <td class="col-price price-child">${r.capped ? `<span style="color: #80cbc4;">≥ ${formatNum(c.price)}</span>` : formatNum(c.price)}</td>
+        <td>${r.capped ? '<span class="atk-dim">WS 計價</span>' : atkRatioHtml(r.ratio)} ${ttBtn}
+          <span style="font-size: 11px; color: #78909c;">${escapeHtml(c.location || '')} ${escapeHtml(c.seller_name || '')}</span></td>
+      `;
+      tbody.appendChild(trc);
+    });
+  });
+}
+
+// ===== 衝卷試算 =====
+function scrollPayload() {
+  const d = atkData();
+  return (d && d.scrolls) || { scrolls: [], chaos: {} };
+}
+
+function scrollBless() {
+  const b = scrollPayload().scrolls.find(s => s.kind === 'protect');
+  return b && b.price ? b.price : null;
+}
+
+// Per-slot outcome of one scroll type: success (attack changes), the slot burned, or the item destroyed.
+// With 祝福卷軸 a failure keeps the slot, so the slot is retried until it succeeds or the item breaks.
+function scrollSlotModel(s, blessPrice) {
+  const p = (s.success || 0) / 100;
+  const c = (s.cursed || 0) / 100;
+  if (scrollUseBless && blessPrice) {
+    const denom = p + (1 - p) * c;
+    if (denom <= 0) return null;
+    return { pSucc: p / denom, pFail: 0, pDestroy: (1 - p) * c / denom, scrolls: 1 / denom, bless: (1 - p) * (1 - c) / denom };
+  }
+  return { pSucc: p, pFail: (1 - p) * (1 - c), pDestroy: (1 - p) * c, scrolls: 1, bless: 0 };
+}
+
+function scrollEval(it, s, chaosRange, blessPrice) {
+  // Past the attack range the market showed, the price is held at the edge instead of extrapolated
+  const clampExtra = extra => Math.min(it.extra_max, Math.max(it.extra_min, extra));
+  const V = (extra, up, failed) => it.predict([clampExtra(extra), up, failed]);
+  // The copy worth scrolling is a clean one with the top roll (WZ upper bound), so that is the start state
+  const start = Math.max(0, it.top_range || 0);
+  const v0 = V(start, 0, 0);
+  const slot = scrollSlotModel(s, blessPrice);
+  const inc = it.magic ? ((s.inc.MAD || 0) + (s.inc.INT || 0)) : (s.inc.PAD || 0);
+  // Success outcomes as [attack delta, probability]; chaos moves the stat within the configured range,
+  // only while the item still has the stat (0 is absorbing)
+  const outcomesAt = extra => {
+    if (s.kind !== 'chaos') return [[inc, 1]];
+    if (it.base + extra <= 0) return [[0, 1]];
+    const lo = chaosRange[0], hi = chaosRange[1], n = hi - lo + 1;
+    const out = [];
+    for (let d = lo; d <= hi; d++) out.push([Math.max(d, -(it.base + extra)), 1 / n]);
+    return out;
+  };
+  const price = s.price || null;
+  const blessCost = scrollUseBless && blessPrice ? blessPrice : 0;
+  if (!slot) return null;
+
+  // One scroll on a clean copy
+  let oneVal = 0;
+  outcomesAt(start).forEach(([d, pr]) => { oneVal += slot.pSucc * pr * V(start + d, 1, 0); });
+  oneVal += slot.pFail * V(start, 0, 1);
+  const oneCost = price !== null ? slot.scrolls * price + slot.bless * blessCost : null;
+  const oneNet = oneCost !== null ? oneVal - v0 - oneCost : null;
+
+  // Every slot, by dynamic programming over (slots used, extra attack, successes, failures)
+  const memo = new Map();
+  const go = (i, extra, up, failed) => {
+    if (i >= it.tuc) return { val: V(extra, up, failed), scrolls: 0, bless: 0, alive: 1, extra: extra, clamped: extra > it.extra_max ? 1 : 0 };
+    const key = `${i},${extra},${up},${failed}`;
+    if (memo.has(key)) return memo.get(key);
+    const r = { val: 0, scrolls: slot.scrolls, bless: slot.bless, alive: 0, extra: 0, clamped: 0 };
+    outcomesAt(extra).forEach(([d, pr]) => {
+      const n = go(i + 1, extra + d, up + 1, failed);
+      const w = slot.pSucc * pr;
+      r.val += w * n.val; r.scrolls += w * n.scrolls; r.bless += w * n.bless; r.alive += w * n.alive; r.extra += w * n.extra; r.clamped += w * n.clamped;
+    });
+    if (slot.pFail > 0) {
+      const n = go(i + 1, extra, up, failed + 1);
+      const w = slot.pFail;
+      r.val += w * n.val; r.scrolls += w * n.scrolls; r.bless += w * n.bless; r.alive += w * n.alive; r.extra += w * n.extra; r.clamped += w * n.clamped;
+    }
+    memo.set(key, r);
+    return r;
+  };
+  const full = go(0, start, 0, 0);
+  const fullCost = price !== null ? v0 + full.scrolls * price + full.bless * blessCost : null;
+  // Expected final attack of the surviving copies; a quarter of them past the market's range means the
+  // estimate leans on the clamped edge
+  const finalExtra = full.alive > 0 ? full.extra / full.alive : 0;
+  const clampedShare = full.alive > 0 ? full.clamped / full.alive : 0;
+  return {
+    name: s.name, scroll: s, scroll_price: price, success: s.success, inc: inc, cursed: s.cursed || 0,
+    v0: v0, start_atk: it.base + start, one_net: oneNet, one_val: oneVal,
+    full_val: full.val, full_scrolls: full.scrolls, full_bless: full.bless, full_cost: fullCost,
+    full_net: fullCost !== null ? full.val - fullCost : null, alive: full.alive,
+    final_extra: finalExtra, final_atk: it.base + finalExtra, clamped_share: clampedShare, extrap: clampedShare > 0.25,
+  };
+}
+
+function scrollAnalyze(items) {
+  const pay = scrollPayload();
+  const chaosRange = (pay.chaos && pay.chaos.atk) || [-3, 3];
+  const blessPrice = scrollBless();
+  const out = [];
+  (items || atkAnalyzeItems()).forEach(it => {
+    if (!it.fit || it.fit.b[0] === null || !it.tuc) return;
+    const seen = new Set();
+    const applicable = pay.scrolls.filter(s => {
+      if (s.kind === 'protect' || seen.has(s.name)) return false;
+      if (s.targets !== null && !s.targets.includes(it.prefix)) return false;
+      const inc = it.magic ? ((s.inc.MAD || 0) + (s.inc.INT || 0)) : (s.inc.PAD || 0);
+      if (s.kind !== 'chaos' && inc <= 0) return false;
+      seen.add(s.name);
+      return true;
+    });
+    if (!applicable.length) return;
+    const children = applicable.map(s => scrollEval(it, s, chaosRange, blessPrice)).filter(Boolean);
+    children.sort((a, b) => (b.full_net ?? -Infinity) - (a.full_net ?? -Infinity) || (b.full_val - a.full_val));
+    const market = it.rows.filter(r => !r.c.hist && r.up > 0 && r.extra !== null && !r.capped).sort((a, b) => a.c.price - b.c.price)[0] || null;
+    const best = children[0];
+    out.push({
+      name: it.name, type: it.type, prefix: it.prefix, magic: it.magic, tuc: it.tuc, n: it.n, r2: it.fit.r2,
+      v0: best.v0, children: children, best: best, market: market,
+      market_price: market ? market.c.price : null,
+      scroll_price: best.scroll_price, success: best.success, one_net: best.one_net,
+      full_val: best.full_val, full_scrolls: best.full_scrolls, full_cost: best.full_cost, full_net: best.full_net, alive: best.alive,
+    });
+  });
+  return out;
+}
+
+function scrollNetHtml(v) {
+  if (v === null || v === undefined) return '<span class="atk-dim">無卷軸市價</span>';
+  const cls = v > 0 ? 'atk-pos' : (v < 0 ? 'atk-neg' : '');
+  return `<span class="${cls}">${v > 0 ? '+' : ''}${atkWsHtml(v)}</span>`;
+}
+
+function scrollCells(r) {
+  const succ = `${r.success}%` + (r.scroll.kind === 'chaos' ? ' <span style="font-size: 11px; color: #78909c;">隨機</span>' : ` <span style="font-size: 11px; color: #78909c;">+${r.inc}</span>`)
+    + (r.cursed ? ` <span style="font-size: 11px; color: var(--c-orange);">毀 ${r.cursed}%</span>` : '');
+  return `
+    <td class="col-price">${atkWsHtml(r.v0)} <span style="font-size: 11px; color: #78909c;">攻 ${r.start_atk}</span></td>
+    <td class="col-price">${r.scroll_price !== null ? formatNum(r.scroll_price) : '<span class="atk-dim">-</span>'}</td>
+    <td style="text-align: center;">${succ}</td>
+    <td class="col-price">${scrollNetHtml(r.one_net)}</td>
+    <td class="col-price">${atkWsHtml(r.full_val)} <span style="font-size: 11px; color: #78909c;">攻 ${r.final_atk.toFixed(1)}</span></td>
+    <td style="text-align: center;">${r.full_scrolls.toFixed(1)}${r.full_bless > 0.05 ? ` <span style="font-size: 11px; color: #78909c;">祝 ${r.full_bless.toFixed(1)}</span>` : ''}</td>
+    <td class="col-price">${r.full_cost !== null ? atkWsHtml(r.full_cost) : '<span class="atk-dim">-</span>'}</td>
+    <td class="col-price">${scrollNetHtml(r.full_net)}</td>
+    <td style="text-align: center;">${Math.round(r.alive * 100)}%</td>
+  `;
+}
+
+function scrollMarketHtml(m) {
+  if (!m) return '<span class="atk-dim">架上沒有衝過的</span>';
+  const c = m.c;
+  return `<span style="color: #cfd8dc;">${formatNum(c.price)}</span>
+    <span style="font-size: 11px; color: #78909c;">${escapeHtml(c.item_name)} 攻 ${m.atk}・卷 ${m.slots}${m.failed ? `・敗 ${m.failed}` : ''} ・ ${escapeHtml(c.location || '')} ${escapeHtml(c.seller_name || '')}</span>`;
+}
+
+function renderScrollTable() {
+  const tbody = document.getElementById('tbody-scroll');
+  tbody.innerHTML = '';
+  const bp = document.getElementById('scrollBlessPrice');
+  if (bp) bp.innerText = scrollBless() ? formatNum(scrollBless()) : '無';
+  const wr = document.getElementById('scrollWsRate');
+  if (wr) wr.innerText = atkWsRate() ? formatNum(atkWsRate()) : '無';
+  const q = searchQuery.toLowerCase().trim();
+  const hit = it => !q || it.name.toLowerCase().includes(q) || it.type.includes(q);
+  const list = atkSortBy(scrollAnalyze().filter(hit), sortStates.scroll);
+  document.getElementById('scrollTabBadge').innerText = list.length;
+  list.forEach((it, idx) => {
+    const parentId = `scroll-grp-${idx}`;
+    const tr = document.createElement('tr');
+    tr.className = `group-parent${it.best.extrap ? ' scroll-extrap' : ''}`;
+    tr.dataset.target = parentId;
+    tr.innerHTML = `
+      <td class="col-name">
+        <span class="tree-toggle">▶</span>
+        <span>${escapeHtml(it.name)}</span>
+        <span style="color: var(--text-muted); font-size: 11px; margin-left: 6px;">(${it.children.length} 種卷・${it.tuc} 次・R² ${it.r2.toFixed(2)})</span>
+        <div style="font-size: 11px; color: #78909c; padding-left: 18px;">最佳：${escapeHtml(it.best.name)}</div>
+      </td>
+      <td>${escapeHtml(it.type)}${it.magic ? ' <span style="color: var(--text-muted);">魔攻+智</span>' : ''}</td>
+      ${scrollCells(it.best)}
+      <td>${scrollMarketHtml(it.market)}</td>
+    `;
+    tbody.appendChild(tr);
+    it.children.forEach(r => {
+      const trc = document.createElement('tr');
+      trc.className = `group-child ${parentId}${r.extrap ? ' scroll-extrap' : ''}`;
+      trc.innerHTML = `
+        <td style="padding-left: 32px; color: #cfd8dc;">${escapeHtml(r.name)}</td>
+        <td></td>
+        ${scrollCells(r)}
+        <td></td>
+      `;
+      tbody.appendChild(trc);
+    });
+  });
+}
+
+document.getElementById('atkHistToggle').addEventListener('change', e => {
+  atkUseHistory = e.target.checked;
+  updateAtkBadge();
+  if (activeTab === 'atk') renderAtkTable();
+  else if (activeTab === 'scroll') renderScrollTable();
+});
+
+document.getElementById('scrollBlessToggle').addEventListener('change', e => {
+  scrollUseBless = e.target.checked;
+  if (activeTab === 'scroll') renderScrollTable();
+});
+
+document.querySelectorAll('[data-atk-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    atkMode = btn.dataset.atkMode;
+    document.querySelectorAll('[data-atk-mode]').forEach(b => b.classList.toggle('active', b === btn));
+    if (activeTab === 'atk') renderAtkTable();
+  });
+});
+
+
+function renderCurrentView() {
+  detailItems = [];
+  document.getElementById('atk-settings').style.display = activeTab === 'atk' ? 'flex' : 'none';
+  document.getElementById('scroll-settings').style.display = activeTab === 'scroll' ? 'flex' : 'none';
+  document.getElementById('hot-note').style.display = activeTab === 'hot' ? 'block' : 'none';
+  updateAtkBadge();
+  updateHotBadge();
+  if (activeTab === 'equip') renderEquipTable();
+  else if (activeTab === 'item') renderItemTable();
+  else if (activeTab === 'sold') renderSoldTable();
+  else if (activeTab === 'hot') renderHotTable();
+  else if (activeTab === 'atk') renderAtkTable();
+  else if (activeTab === 'scroll') renderScrollTable();
+}
+
+// Tree row expand / collapse toggle
+document.addEventListener('click', (e) => {
+  const tr = e.target.closest('tr.group-parent');
+  if (tr) {
+    const targetClass = tr.dataset.target;
+    const isExpanded = tr.classList.toggle('expanded');
+    const children = document.querySelectorAll(`.${targetClass}`);
+    children.forEach(c => c.classList.toggle('show', isExpanded));
+  }
+});
+
+// Tab buttons
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeTab = btn.dataset.tab;
+
+    document.querySelectorAll('.data-table').forEach(t => t.style.display = 'none');
+    document.getElementById(`table-${activeTab}`).style.display = 'table';
+    renderCurrentView();
+  });
+});
+
+// Search Filter
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  searchQuery = e.target.value;
+  renderCurrentView();
+});
+
+// Expand / Collapse All
+document.getElementById('expandAllBtn').addEventListener('click', () => {
+  const currentTable = document.getElementById(`table-${activeTab}`);
+  currentTable.querySelectorAll('tr.group-parent').forEach(p => p.classList.add('expanded'));
+  currentTable.querySelectorAll('tr.group-child').forEach(c => c.classList.add('show'));
+});
+
+document.getElementById('collapseAllBtn').addEventListener('click', () => {
+  const currentTable = document.getElementById(`table-${activeTab}`);
+  currentTable.querySelectorAll('tr.group-parent').forEach(p => p.classList.remove('expanded'));
+  currentTable.querySelectorAll('tr.group-child').forEach(c => c.classList.remove('show'));
+});
+
+document.getElementById('refreshBtn').addEventListener('click', () => {
+  location.reload();
+});
+
+// Table Sorting
+document.querySelectorAll('th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const sortField = th.dataset.sort;
+    const currentTableId = th.closest('table').id.replace('table-', '');
+    const currentSort = sortStates[currentTableId];
+
+    if (currentSort.col === sortField) {
+      currentSort.asc = !currentSort.asc;
+    } else {
+      currentSort.col = sortField;
+      currentSort.asc = true;
+    }
+
+    // Update UI headers
+    th.closest('tr').querySelectorAll('th').forEach(h => h.classList.remove('sorted-asc', 'sorted-desc'));
+    th.classList.add(currentSort.asc ? 'sorted-asc' : 'sorted-desc');
+
+    renderCurrentView();
+  });
+});
+
+// Detail Modal
+function openDetailModal(idx) {
+  const item = detailItems[idx];
+  const modal = document.getElementById('detailModal');
+  const title = document.getElementById('modalTitle');
+  const img = document.getElementById('modalImg');
+  const text = document.getElementById('modalText');
+
+  title.innerText = `${item.item_name} （${item.location} - ${item.seller_name}）`;
+  
+  if (item.tooltip_img_base64) {
+    img.src = item.tooltip_img_base64;
+    img.style.display = 'inline-block';
+  } else if (item.tooltip_img_rel) {
+    img.src = item.tooltip_img_rel;
+    img.style.display = 'inline-block';
+  } else {
+    img.style.display = 'none';
+  }
+
+  const rawLines = (item.tooltip_text || '尚未收錄原始 Tooltip 文字').replace(/ \| /g, '\n');
+  const extraStats = [
+    item.price ? `售價: ${formatNum(item.price)}` : '',
+    item.quantity ? `數量: ${item.quantity}` : '',
+    item.sold_qty ? `已售數量: ${item.sold_qty}` : '',
+    item.updated_at ? `更新時間: ${item.updated_at}` : ''
+  ].filter(Boolean).join(' ｜ ');
+
+  const baseLine = item.base_eval ? `\n${baseSummary(item.base_eval)}` : '';
+  text.innerText = `${extraStats}${baseLine}\n\n【收錄詳細屬性】\n${rawLines}`;
+  modal.classList.add('open');
+}
+
+document.getElementById('modalClose').addEventListener('click', () => {
+  document.getElementById('detailModal').classList.remove('open');
+});
+document.getElementById('detailModal').addEventListener('click', (e) => {
+  if (e.target.id === 'detailModal') {
+    document.getElementById('detailModal').classList.remove('open');
+  }
+});
+
+// Initial boot: version query busts the Pages CDN cache after each publish
+fetch('market_data.json?v=20261105210639')
+  .then(r => {
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
+  })
+  .then(data => {
+    MARKET_DATA = data;
+    initStats();
+    renderCurrentView();
+  })
+  .catch(err => {
+    document.getElementById('stat-update-time').innerText = `資料載入失敗：${err.message}`;
+  });
+
+// MapleStory Floating Image Tooltip Mouse Tracking
+const floatTt = document.getElementById('maple-tooltip-float');
+const floatImg = document.getElementById('maple-tooltip-img');
+const floatCap = document.getElementById('maple-tooltip-caption');
+
+document.addEventListener('mouseover', (e) => {
+  const row = e.target.closest('[data-tooltip-img]');
+  if (row && row.dataset.tooltipImg) {
+    const src = row.dataset.tooltipImg;
+    const name = row.dataset.tooltipName || '';
+    if (src) {
+      floatImg.src = src;
+      floatCap.innerText = name;
+      floatTt.style.display = 'block';
+    }
+  }
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (floatTt.style.display === 'block') {
+    let x = e.clientX + 18;
+    let y = e.clientY + 12;
+    const w = floatTt.offsetWidth || 280;
+    const h = floatTt.offsetHeight || 340;
+    if (x + w > window.innerWidth - 12) {
+      x = e.clientX - w - 18;
+    }
+    if (y + h > window.innerHeight - 12) {
+      y = window.innerHeight - h - 12;
+    }
+    if (y < 10) y = 10;
+    floatTt.style.left = `${x}px`;
+    floatTt.style.top = `${y}px`;
+  }
+});
+
+document.addEventListener('mouseout', (e) => {
+  const row = e.target.closest('[data-tooltip-img]');
+  if (row) {
+    const related = e.relatedTarget ? e.relatedTarget.closest('[data-tooltip-img]') : null;
+    if (related !== row) {
+      floatTt.style.display = 'none';
+    }
+  }
+});
+</script>
+</body>
+</html>
